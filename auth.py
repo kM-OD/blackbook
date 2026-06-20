@@ -1,9 +1,10 @@
 """
-用户认证模块 v3.0 - 支持 Session 持久化（刷新不丢登录状态）
-- 数据存储: users.json / sessions.json (项目目录下 data/)
+用户认证模块 v3.1 - 支持云端存储自选股
+- 本地存储: users.json / sessions.json (项目目录下 data/)
+- 云端存储: GitHub Gist（当 PAT 配置时自动启用）
 - 邀请码: 1916416299 (硬编码)
 - 密码: SHA256哈希存储
-- 自选: 按用户隔离存储
+- 自选: 按用户隔离存储，优先云端
 - Session: 用 URL query_param 传递 token，刷新不丢失
 """
 import os
@@ -12,7 +13,15 @@ import hashlib
 import uuid
 from datetime import datetime, timedelta
 
-# ====== 配置 ======
+# ===== 尝试导入云端存储 =====
+try:
+    from cloud_storage import load_watchlist_cloud, save_watchlist_cloud, PAT as CLOUD_PAT
+    _CLOUD_ENABLED = bool(CLOUD_PAT)
+except Exception:
+    _CLOUD_ENABLED = False
+
+
+# ===== 配置 =====
 INVITE_CODE = "1916416299"
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 USERS_FILE = os.path.join(DATA_DIR, "users.json")
@@ -78,7 +87,7 @@ def _clean_expired_sessions(sessions: dict) -> dict:
     }
 
 
-# ====== 注册 ======
+# ===== 注册 =====
 def register(username: str, password: str, invite_code: str) -> dict:
     if not username or not password:
         return {"success": False, "msg": "用户名和密码不能为空"}
@@ -101,7 +110,7 @@ def register(username: str, password: str, invite_code: str) -> dict:
     return {"success": True, "msg": "注册成功"}
 
 
-# ====== 登录 ======
+# ===== 登录 =====
 def login(username: str, password: str) -> dict:
     users = _load_users()
     if username not in users:
@@ -153,18 +162,13 @@ def logout(token: str):
     _save_sessions(sessions)
 
 
-# ====== 用户存在检查 ======
+# ===== 用户存在检查 =====
 def user_exists(username: str) -> bool:
     users = _load_users()
     return username in users
 
 
-# ====== 自选股数据(按用户隔离) ======
-# 支持云端（Gist）和本地两种存储方式
-
-_USE_CLOUD = bool(os.environ.get("GITHUB_PAT", ""))
-
-
+# ===== 自选股数据(按用户隔离，优先云端) =====
 def get_watchlist_file(username: str) -> str:
     user_dir = os.path.join(DATA_DIR, "users")
     os.makedirs(user_dir, exist_ok=True)
@@ -172,16 +176,16 @@ def get_watchlist_file(username: str) -> str:
 
 
 def load_user_watchlist(username: str) -> list:
-    """加载自选列表：优先云端，fallback 本地"""
-    if _USE_CLOUD:
+    """加载自选股：优先云端，失败则本地"""
+    # 优先云端
+    if _CLOUD_ENABLED:
         try:
-            from cloud_storage import load_watchlist_cloud
-            data = load_watchlist_cloud(username)
-            if data is not None:
-                return data
+            cloud_data = load_watchlist_cloud(username)
+            if cloud_data:
+                return cloud_data
         except Exception:
             pass
-    # Local fallback
+    # 本地兜底
     fpath = get_watchlist_file(username)
     if not os.path.exists(fpath):
         return []
@@ -193,15 +197,14 @@ def load_user_watchlist(username: str) -> list:
 
 
 def save_user_watchlist(username: str, watchlist: list):
-    """保存自选列表：优先云端，同步本地"""
-    # Always try cloud first
-    if _USE_CLOUD:
+    """保存自选股：云端+本地双写"""
+    # 保存云端
+    if _CLOUD_ENABLED:
         try:
-            from cloud_storage import save_watchlist_cloud
             save_watchlist_cloud(username, watchlist)
         except Exception:
             pass
-    # Also save locally as backup
+    # 保存本地
     fpath = get_watchlist_file(username)
     tmp = fpath + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
@@ -209,7 +212,7 @@ def save_user_watchlist(username: str, watchlist: list):
     os.replace(tmp, fpath)
 
 
-# ====== 获取所有用户名 ======
+# ===== 获取所有用户名 =====
 def list_users() -> list:
     users = _load_users()
     return list(users.keys())
