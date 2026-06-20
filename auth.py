@@ -15,10 +15,10 @@ from datetime import datetime, timedelta
 
 # ===== 尝试导入云端存储 =====
 try:
-    from cloud_storage import load_watchlist_cloud, save_watchlist_cloud, PAT as CLOUD_PAT
-    _CLOUD_ENABLED = bool(CLOUD_PAT)
+    from cloud_storage import load_watchlist_cloud, save_watchlist_cloud
+    _HAS_CLOUD = True
 except Exception:
-    _CLOUD_ENABLED = False
+    _HAS_CLOUD = False
 
 
 # ===== 配置 =====
@@ -177,12 +177,12 @@ def get_watchlist_file(username: str) -> str:
 
 def load_user_watchlist(username: str) -> list:
     """加载自选股：优先云端，失败则本地"""
-    # 优先云端
-    if _CLOUD_ENABLED:
+    # 优先云端（cloud_storage 内部会 lazy 读取 secrets，无需预先判断）
+    if _HAS_CLOUD:
         try:
             cloud_data = load_watchlist_cloud(username)
-            if cloud_data:
-                return cloud_data
+            # 区分"云端无数据"和"云端读取失败"
+            return cloud_data  # 即使为空列表也返回（说明云端确认无数据）
         except Exception:
             pass
     # 本地兜底
@@ -199,7 +199,7 @@ def load_user_watchlist(username: str) -> list:
 def save_user_watchlist(username: str, watchlist: list):
     """保存自选股：云端+本地双写"""
     # 保存云端
-    if _CLOUD_ENABLED:
+    if _HAS_CLOUD:
         try:
             save_watchlist_cloud(username, watchlist)
         except Exception:
