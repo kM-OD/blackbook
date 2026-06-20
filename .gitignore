@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+gen_app.py
+deploy_*.py
+test_pat.py
+
+# Streamlit
+.streamlit/
+
+# Data (user data should not be committed)
+data/users/*.json
+data/sessions.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
