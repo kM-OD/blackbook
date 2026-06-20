@@ -23,6 +23,14 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# ===== 把 Streamlit Secrets 写入环境变量（让 cloud_storage.py 一定能读到）=====
+try:
+    import os
+    os.environ["GITHUB_PAT"] = st.secrets["GITHUB_PAT"]
+    os.environ["GITHUB_USER"] = st.secrets.get("GITHUB_USER", "kM-OD")
+except Exception:
+    pass
+
 from data_fetcher import (
     fetch_lhb_one_day, get_market_env_by_index,
     fetch_multi_day_review_batch, fill_lhb_with_realtime,
