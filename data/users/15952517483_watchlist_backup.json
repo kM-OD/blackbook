@@ -1,0 +1,362 @@
+[
+  {
+    "code": "002436",
+    "name": "兴森科技",
+    "date_added": "2026-06-17",
+    "price_at_add": 47.8,
+    "score": 86,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  },
+  {
+    "code": "600460",
+    "name": "士兰微",
+    "date_added": "2026-06-17",
+    "price_at_add": 40.83,
+    "score": 86,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  },
+  {
+    "code": "001257",
+    "name": "盛龙股份",
+    "date_added": "2026-06-17",
+    "price_at_add": 32.72,
+    "score": 81,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  },
+  {
+    "code": "002491",
+    "name": "通鼎互联",
+    "date_added": "2026-06-17",
+    "price_at_add": 28.71,
+    "score": 66,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  },
+  {
+    "code": "605006",
+    "name": "山东玻纤",
+    "date_added": "2026-06-17",
+    "price_at_add": 26.0,
+    "score": 66,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  },
+  {
+    "code": "300283",
+    "name": "温州宏丰",
+    "date_added": "2026-06-17",
+    "price_at_add": 22.15,
+    "score": 66,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  },
+  {
+    "code": "000777",
+    "name": "中核科技",
+    "date_added": "2026-06-17",
+    "price_at_add": 21.86,
+    "score": 64,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  },
+  {
+    "code": "603002",
+    "name": "宏昌电子",
+    "date_added": "2026-06-17",
+    "price_at_add": 23.2,
+    "score": 51,
+    "star_label": "黄金信号",
+    "industry": "消费电子"
+  },
+  {
+    "code": "300522",
+    "name": "世名科技",
+    "date_added": "2026-06-17",
+    "price_at_add": 16.01,
+    "score": 76,
+    "star_label": "标准推荐",
+    "industry": "其他"
+  },
+  {
+    "code": "600397",
+    "name": "江钨装备",
+    "date_added": "2026-06-17",
+    "price_at_add": 18.36,
+    "score": 71,
+    "star_label": "标准推荐",
+    "industry": "其他"
+  },
+  {
+    "code": "600703",
+    "name": "三安光电",
+    "date_added": "2026-06-17",
+    "price_at_add": 17.16,
+    "score": 66,
+    "star_label": "标准推荐",
+    "industry": "其他"
+  },
+  {
+    "code": "603070",
+    "name": "万控智造",
+    "date_added": "2026-06-17",
+    "price_at_add": 18.15,
+    "score": 56,
+    "star_label": "观察名单",
+    "industry": "其他"
+  },
+  {
+    "code": "920161",
+    "name": "龙辰科技",
+    "date_added": "2026-06-17",
+    "price_at_add": 42.33,
+    "score": 53,
+    "star_label": "观察名单",
+    "industry": "其他"
+  },
+  {
+    "code": "002842",
+    "name": "翔鹭钨业",
+    "date_added": "2026-06-17",
+    "price_at_add": 43.38,
+    "score": 51,
+    "star_label": "观察名单",
+    "industry": "其他"
+  },
+  {
+    "code": "002972",
+    "name": "科安达",
+    "date_added": "2026-06-17",
+    "price_at_add": 16.56,
+    "score": 51,
+    "star_label": "观察名单",
+    "industry": "其他"
+  },
+  {
+    "code": "300255",
+    "name": "常山药业",
+    "date_added": "2026-06-17",
+    "price_at_add": 24.92,
+    "score": 60,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "600353",
+    "name": "旭光电子",
+    "date_added": "2026-06-17",
+    "price_at_add": 38.19,
+    "score": 44,
+    "star_label": "淘汰",
+    "industry": "消费电子"
+  },
+  {
+    "code": "603989",
+    "name": "艾华集团",
+    "date_added": "2026-06-17",
+    "price_at_add": 37.73,
+    "score": 44,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "688079",
+    "name": "美迪凯",
+    "date_added": "2026-06-17",
+    "price_at_add": 31.94,
+    "score": 44,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "920122",
+    "name": "中纺标",
+    "date_added": "2026-06-17",
+    "price_at_add": 26.5,
+    "score": 43,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "920753",
+    "name": "天纺标",
+    "date_added": "2026-06-17",
+    "price_at_add": 19.19,
+    "score": 43,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "920126",
+    "name": "永大股份",
+    "date_added": "2026-06-17",
+    "price_at_add": 16.71,
+    "score": 43,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "301669",
+    "name": "高特电子",
+    "date_added": "2026-06-17",
+    "price_at_add": 36.95,
+    "score": 41,
+    "star_label": "淘汰",
+    "industry": "消费电子"
+  },
+  {
+    "code": "600110",
+    "name": "诺德股份",
+    "date_added": "2026-06-17",
+    "price_at_add": 17.22,
+    "score": 36,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "600552",
+    "name": "凯盛科技",
+    "date_added": "2026-06-17",
+    "price_at_add": 24.13,
+    "score": 34,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "603922",
+    "name": "ST金鸿顺",
+    "date_added": "2026-06-17",
+    "price_at_add": 15.29,
+    "score": 34,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "300853",
+    "name": "申昊科技",
+    "date_added": "2026-06-17",
+    "price_at_add": 29.31,
+    "score": 30,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "600186",
+    "name": "莲花控股",
+    "date_added": "2026-06-17",
+    "price_at_add": 14.66,
+    "score": 24,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "600636",
+    "name": "退市国化",
+    "date_added": "2026-06-17",
+    "price_at_add": 1.85,
+    "score": 23,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "600421",
+    "name": "退市华嵘",
+    "date_added": "2026-06-17",
+    "price_at_add": 0.26,
+    "score": 20,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "601636",
+    "name": "旗滨集团",
+    "date_added": "2026-06-17",
+    "price_at_add": 8.67,
+    "score": 16,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "000725",
+    "name": "京东方A",
+    "date_added": "2026-06-17",
+    "price_at_add": 6.71,
+    "score": 16,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "600608",
+    "name": "退市沪科",
+    "date_added": "2026-06-17",
+    "price_at_add": 0.18,
+    "score": 13,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "600599",
+    "name": "退市熊猫",
+    "date_added": "2026-06-17",
+    "price_at_add": 0.4,
+    "score": 8,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "605081",
+    "name": "退市太和",
+    "date_added": "2026-06-17",
+    "price_at_add": 0.37,
+    "score": 8,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "600193",
+    "name": "退市创兴",
+    "date_added": "2026-06-17",
+    "price_at_add": 0.16,
+    "score": 8,
+    "star_label": "淘汰",
+    "industry": "其他"
+  },
+  {
+    "code": "002989",
+    "name": "中天精装",
+    "date_added": "2026-06-17",
+    "price_at_add": 33.97,
+    "score": 86,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  },
+  {
+    "code": "688598",
+    "name": "金博股份",
+    "date_added": "2026-06-17",
+    "price_at_add": 49.79,
+    "score": 81,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  },
+  {
+    "code": "301310",
+    "name": "鑫宏业",
+    "date_added": "2026-06-17",
+    "price_at_add": 38.96,
+    "score": 81,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  },
+  {
+    "code": "002806",
+    "name": "华锋股份",
+    "date_added": "2026-06-16",
+    "price_at_add": 20.7,
+    "score": 71,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  }
+]
