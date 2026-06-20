@@ -15,7 +15,10 @@ from datetime import datetime, timedelta
 
 # ===== 尝试导入云端存储 =====
 try:
-    from cloud_storage import load_watchlist_cloud, save_watchlist_cloud
+    from cloud_storage import (
+        load_watchlist_cloud, save_watchlist_cloud,
+        load_sessions_cloud, save_sessions_cloud,
+    )
     _HAS_CLOUD = True
 except Exception:
     _HAS_CLOUD = False
@@ -55,6 +58,16 @@ def _save_users(users: dict):
 
 
 def _load_sessions() -> dict:
+    """加载 sessions：优先云端，失败则本地"""
+    # 优先云端
+    if _HAS_CLOUD:
+        try:
+            cloud_sessions = load_sessions_cloud()
+            if cloud_sessions:
+                return cloud_sessions
+        except Exception:
+            pass
+    # 本地兜底
     _ensure_data_dir()
     if not os.path.exists(SESSIONS_FILE):
         return {}
@@ -66,6 +79,14 @@ def _load_sessions() -> dict:
 
 
 def _save_sessions(sessions: dict):
+    """保存 sessions：云端+本地双写"""
+    # 保存云端
+    if _HAS_CLOUD:
+        try:
+            save_sessions_cloud(sessions)
+        except Exception:
+            pass
+    # 保存本地
     _ensure_data_dir()
     tmp = SESSIONS_FILE + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
