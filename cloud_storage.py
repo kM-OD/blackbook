@@ -119,3 +119,69 @@ def save_watchlist_cloud(username, watchlist):
     if result and not result.get("error"):
         return True
     return False
+
+
+# ==================== Sessions 云端读写 ====================
+
+def _get_sessions_gist_id(pat=None):
+    """查找 sessions Gist ID"""
+    if pat is None:
+        pat, user = _get_pat_and_user()
+    if not pat:
+        return None
+    result = _api("GET", f"users/{user}/gists?per_page=100", pat=pat)
+    if not result or isinstance(result, dict):
+        return None
+    for gist in result:
+        if gist.get("description") == "[blackbook:sessions]":
+            return gist["id"]
+    return None
+
+
+def load_sessions_cloud():
+    """从云端读取 sessions"""
+    pat, user = _get_pat_and_user()
+    if not pat:
+        return None
+    gist_id = _get_sessions_gist_id(pat=pat)
+    if not gist_id:
+        return None
+    result = _api("GET", f"gists/{gist_id}", pat=pat)
+    if not result or isinstance(result, dict) and result.get("error"):
+        return None
+    files = result.get("files", {})
+    for fname, finfo in files.items():
+        if fname == "sessions.json":
+            content = finfo.get("content", "{}")
+            try:
+                return json.loads(content)
+            except Exception:
+                return None
+    return None
+
+
+def save_sessions_cloud(sessions):
+    """保存 sessions 到云端"""
+    pat, user = _get_pat_and_user()
+    if not pat:
+        return False
+    content = json.dumps(sessions, ensure_ascii=False, indent=2)
+    desc = "[blackbook:sessions]"
+    filename = "sessions.json"
+
+    gist_id = _get_sessions_gist_id(pat=pat)
+
+    data = {
+        "description": desc,
+        "files": {filename: {"content": content}},
+        "public": False,
+    }
+
+    if gist_id:
+        result = _api("PATCH", f"gists/{gist_id}", data, pat=pat)
+    else:
+        result = _api("POST", "gists", data, pat=pat)
+
+    if result and not result.get("error"):
+        return True
+    return False
