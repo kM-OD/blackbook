@@ -1,0 +1,29 @@
+[
+  {
+    "code": "002842",
+    "name": "翔鹭钨业",
+    "date_added": "2026-06-15",
+    "price_at_add": 43.42,
+    "score": 81,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  },
+  {
+    "code": "001257",
+    "name": "盛龙股份",
+    "date_added": "2026-06-15",
+    "price_at_add": 30.51,
+    "score": 81,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  },
+  {
+    "code": "301526",
+    "name": "国际复材",
+    "date_added": "2026-06-15",
+    "price_at_add": 34.13,
+    "score": 76,
+    "star_label": "黄金信号",
+    "industry": "其他"
+  }
+]
