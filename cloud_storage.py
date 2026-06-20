@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-云端数据存储 - 使用 GitHub Private Gist
-每个用户一个 Gist 文件，存储自选股数据
-
-⚠️ PAT/USER 改为 lazy 读取（每次调用时读 st.secrets），
-避免模块加载时 Streamlit 尚未初始化导致读不到 secrets。
+云端数据存储 - 使用 GitHub Repo Contents API
+每个用户一个 JSON 文件，存在 blackbook 仓库的 data/ 目录下
+只需 repo 权限，不依赖 Gist
 """
-
 
 import json
 import base64
@@ -14,174 +11,141 @@ import urllib.request
 import urllib.error
 
 
-def _get_pat_and_user():
-    """延迟读取 PAT / USER，兼容 Streamlit secrets 和 os.environ"""
-    # 1. 尝试 st.secrets（Streamlit Cloud 正式方式）
+def _get_conf():
+    """读取 PAT / USER / REPO，兼容 st.secrets 和 os.environ"""
     try:
         import streamlit as st
         pat = st.secrets.get("GITHUB_PAT", "").strip()
         user = st.secrets.get("GITHUB_USER", "kM-OD").strip()
+        repo = st.secrets.get("GITHUB_REPO", "blackbook").strip()
         if pat:
-            return pat, user
+            return pat, user, repo
     except Exception:
         pass
 
-    # 2. fallback: 环境变量（本地调试用）
     import os
     pat = os.environ.get("GITHUB_PAT", "").strip()
     user = os.environ.get("GITHUB_USER", "kM-OD").strip()
-    return pat, user
+    repo = os.environ.get("GITHUB_REPO", "blackbook").strip()
+    return pat, user, repo
 
 
-def _api(method, path, data=None, pat=None):
-    """调用 GitHub API"""
-    if pat is None:
-        pat, _ = _get_pat_and_user()
-    if not pat:
-        return None
-    url = f"https://api.github.com/{path}"
-    body = json.dumps(data).encode() if data else None
-    req = urllib.request.Request(url, data=body, method=method)
+def _gh_get(path, pat):
+    """GET 请求 GitHub API"""
+    url = "https://api.github.com/repos/{}/{}".format(_get_conf()[1], path)
+    req = urllib.request.Request(url)
     req.add_header("Authorization", "token " + pat)
     req.add_header("Accept", "application/vnd.github.v3+json")
-    if data:
-        req.add_header("Content-Type", "application/json")
     try:
-        resp = urllib.request.urlopen(req, timeout=10)
+        resp = urllib.request.urlopen(req, timeout=15)
+        return json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return None
+        return {"error": True, "code": e.code}
+    except Exception:
+        return {"error": True}
+
+
+def _gh_put(path, data, pat):
+    """PUT 请求 GitHub API（创建/更新文件）"""
+    url = "https://api.github.com/repos/{}/{}".format(_get_conf()[1], path)
+    body = json.dumps(data).encode()
+    req = urllib.request.Request(url, data=body, method="PUT")
+    req.add_header("Authorization", "token " + pat)
+    req.add_header("Accept", "application/vnd.github.v3+json")
+    req.add_header("Content-Type", "application/json")
+    try:
+        resp = urllib.request.urlopen(req, timeout=15)
         return json.loads(resp.read())
     except urllib.error.HTTPError as e:
         return {"error": True, "code": e.code}
-    except Exception as e:
-        return {"error": True, "msg": str(e)}
+    except Exception:
+        return {"error": True}
 
 
-def get_gist_id(username, pat=None):
-    """查找用户的 Gist ID（通过 description 匹配）"""
-    if pat is None:
-        pat, user = _get_pat_and_user()
-    if not pat:
-        return None
-    result = _api("GET", f"users/{user}/gists?per_page=100", pat=pat)
-    if not result or isinstance(result, dict):
-        return None
-    for gist in result:
-        desc = gist.get("description", "")
-        tag = f"[blackbook:{username}]"
-        if tag in desc:
-            return gist["id"]
-    return None
-
+# ==================== 自选股读写 ====================
 
 def load_watchlist_cloud(username):
-    """从云端 Gist 读取自选列表"""
-    pat, user = _get_pat_and_user()
+    """从仓库 data/<username>_watchlist.json 读取自选"""
+    pat, user, repo = _get_conf()
     if not pat:
         return []
-    gist_id = get_gist_id(username, pat=pat)
-    if not gist_id:
+    path = "{}/contents/data/{}_watchlist.json".format(repo, username)
+    result = _gh_get(path, pat)
+    if not result or result.get("error"):
         return []
-    result = _api("GET", f"gists/{gist_id}", pat=pat)
-    if not result or isinstance(result, dict) and result.get("error"):
+    content_b64 = result.get("content", "")
+    try:
+        content = base64.b64decode(content_b64).decode("utf-8")
+        return json.loads(content)
+    except Exception:
         return []
-    files = result.get("files", {})
-    for fname, finfo in files.items():
-        if fname.endswith("_watchlist.json") or fname == "watchlist.json":
-            content = finfo.get("content", "[]")
-            try:
-                return json.loads(content)
-            except Exception:
-                return []
-    return []
 
 
 def save_watchlist_cloud(username, watchlist):
-    """保存自选列表到云端 Gist"""
-    pat, user = _get_pat_and_user()
+    """保存自选到仓库 data/<username>_watchlist.json"""
+    pat, user, repo = _get_conf()
     if not pat:
         return False
-    content = json.dumps(watchlist, ensure_ascii=False, indent=2)
-    filename = f"{username}_watchlist.json"
-    desc = f"[blackbook:{username}] 自选股数据"
+    # 先获取 SHA（更新需要）
+    path = "{}/contents/data/{}_watchlist.json".format(repo, username)
+    existing = _gh_get(path, pat)
+    sha = existing.get("sha") if existing and not existing.get("error") else None
 
-    gist_id = get_gist_id(username, pat=pat)
+    content = json.dumps(watchlist, ensure_ascii=False, indent=2)
+    content_b64 = base64.b64encode(content.encode("utf-8")).decode("ascii")
 
     data = {
-        "description": desc,
-        "files": {filename: {"content": content}},
-        "public": False,
+        "message": "save watchlist: {}".format(username),
+        "content": content_b64,
+        "branch": "main",
     }
+    if sha:
+        data["sha"] = sha
 
-    if gist_id:
-        result = _api("PATCH", f"gists/{gist_id}", data, pat=pat)
-    else:
-        result = _api("POST", "gists", data, pat=pat)
-
-    if result and not result.get("error"):
-        return True
-    return False
+    result = _gh_put(path, data, pat)
+    return bool(result and not result.get("error"))
 
 
-# ==================== Sessions 云端读写 ====================
-
-def _get_sessions_gist_id(pat=None):
-    """查找 sessions Gist ID"""
-    if pat is None:
-        pat, user = _get_pat_and_user()
-    if not pat:
-        return None
-    result = _api("GET", f"users/{user}/gists?per_page=100", pat=pat)
-    if not result or isinstance(result, dict):
-        return None
-    for gist in result:
-        if gist.get("description") == "[blackbook:sessions]":
-            return gist["id"]
-    return None
-
+# ==================== Sessions 读写 ====================
 
 def load_sessions_cloud():
-    """从云端读取 sessions"""
-    pat, user = _get_pat_and_user()
+    """从仓库 data/sessions.json 读取 sessions"""
+    pat, user, repo = _get_conf()
     if not pat:
         return None
-    gist_id = _get_sessions_gist_id(pat=pat)
-    if not gist_id:
+    path = "{}/contents/data/sessions.json".format(repo)
+    result = _gh_get(path, pat)
+    if not result or result.get("error"):
         return None
-    result = _api("GET", f"gists/{gist_id}", pat=pat)
-    if not result or isinstance(result, dict) and result.get("error"):
+    content_b64 = result.get("content", "")
+    try:
+        content = base64.b64decode(content_b64).decode("utf-8")
+        return json.loads(content)
+    except Exception:
         return None
-    files = result.get("files", {})
-    for fname, finfo in files.items():
-        if fname == "sessions.json":
-            content = finfo.get("content", "{}")
-            try:
-                return json.loads(content)
-            except Exception:
-                return None
-    return None
 
 
 def save_sessions_cloud(sessions):
-    """保存 sessions 到云端"""
-    pat, user = _get_pat_and_user()
+    """保存 sessions 到仓库 data/sessions.json"""
+    pat, user, repo = _get_conf()
     if not pat:
         return False
-    content = json.dumps(sessions, ensure_ascii=False, indent=2)
-    desc = "[blackbook:sessions]"
-    filename = "sessions.json"
+    path = "{}/contents/data/sessions.json".format(repo)
+    existing = _gh_get(path, pat)
+    sha = existing.get("sha") if existing and not existing.get("error") else None
 
-    gist_id = _get_sessions_gist_id(pat=pat)
+    content = json.dumps(sessions, ensure_ascii=False, indent=2)
+    content_b64 = base64.b64encode(content.encode("utf-8")).decode("ascii")
 
     data = {
-        "description": desc,
-        "files": {filename: {"content": content}},
-        "public": False,
+        "message": "save sessions",
+        "content": content_b64,
+        "branch": "main",
     }
+    if sha:
+        data["sha"] = sha
 
-    if gist_id:
-        result = _api("PATCH", f"gists/{gist_id}", data, pat=pat)
-    else:
-        result = _api("POST", "gists", data, pat=pat)
-
-    if result and not result.get("error"):
-        return True
-    return False
+    result = _gh_put(path, data, pat)
+    return bool(result and not result.get("error"))
