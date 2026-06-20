@@ -160,6 +160,11 @@ def user_exists(username: str) -> bool:
 
 
 # ====== 自选股数据(按用户隔离) ======
+# 支持云端（Gist）和本地两种存储方式
+
+_USE_CLOUD = bool(os.environ.get("GITHUB_PAT", ""))
+
+
 def get_watchlist_file(username: str) -> str:
     user_dir = os.path.join(DATA_DIR, "users")
     os.makedirs(user_dir, exist_ok=True)
@@ -167,6 +172,16 @@ def get_watchlist_file(username: str) -> str:
 
 
 def load_user_watchlist(username: str) -> list:
+    """加载自选列表：优先云端，fallback 本地"""
+    if _USE_CLOUD:
+        try:
+            from cloud_storage import load_watchlist_cloud
+            data = load_watchlist_cloud(username)
+            if data is not None:
+                return data
+        except Exception:
+            pass
+    # Local fallback
     fpath = get_watchlist_file(username)
     if not os.path.exists(fpath):
         return []
@@ -178,6 +193,15 @@ def load_user_watchlist(username: str) -> list:
 
 
 def save_user_watchlist(username: str, watchlist: list):
+    """保存自选列表：优先云端，同步本地"""
+    # Always try cloud first
+    if _USE_CLOUD:
+        try:
+            from cloud_storage import save_watchlist_cloud
+            save_watchlist_cloud(username, watchlist)
+        except Exception:
+            pass
+    # Also save locally as backup
     fpath = get_watchlist_file(username)
     tmp = fpath + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
