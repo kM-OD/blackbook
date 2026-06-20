@@ -7,10 +7,19 @@ import json
 import os
 import base64
 import urllib.request
+import urllib.error
 
-# 从环境变量读取 PAT（Streamlit Cloud 用 secrets.toml）
-PAT = os.environ.get("GITHUB_PAT", "")
-USER = os.environ.get("GITHUB_USER", "kM-OD")
+# 优先从 Streamlit secrets 读取，fallback 到环境变量
+try:
+    import streamlit as st
+    _PAT = st.secrets.get("GITHUB_PAT", "")
+    _USER = st.secrets.get("GITHUB_USER", "kM-OD")
+except Exception:
+    _PAT = os.environ.get("GITHUB_PAT", "")
+    _USER = os.environ.get("GITHUB_USER", "kM-OD")
+
+PAT = _PAT
+USER = _USER
 
 
 def _api(method, path, data=None):
@@ -25,7 +34,7 @@ def _api(method, path, data=None):
     if data:
         req.add_header("Content-Type", "application/json")
     try:
-        resp = urllib.request.urlopen(req)
+        resp = urllib.request.urlopen(req, timeout=10)
         return json.loads(resp.read())
     except urllib.error.HTTPError as e:
         return {"error": True, "code": e.code}
@@ -35,7 +44,7 @@ def _api(method, path, data=None):
 
 def get_gist_id(username):
     """查找用户的 Gist ID（通过 description 匹配）"""
-    result = _api("GET", f"users/{USER}/gists")
+    result = _api("GET", f"users/{USER}/gists?per_page=100")
     if not result or isinstance(result, dict):
         return None
     for gist in result:
@@ -48,6 +57,8 @@ def get_gist_id(username):
 
 def load_watchlist_cloud(username):
     """从云端 Gist 读取自选列表"""
+    if not PAT:
+        return []
     gist_id = get_gist_id(username)
     if not gist_id:
         return []
@@ -68,6 +79,8 @@ def load_watchlist_cloud(username):
 
 def save_watchlist_cloud(username, watchlist):
     """保存自选列表到云端 Gist"""
+    if not PAT:
+        return False
     content = json.dumps(watchlist, ensure_ascii=False, indent=2)
     filename = f"{username}_watchlist.json"
     desc = f"[blackbook:{username}] 自选股数据"
