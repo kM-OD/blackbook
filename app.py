@@ -337,6 +337,23 @@ with tab_watch:
     st.header("⭐ 我的自选跟踪")
     wl = load_user_watchlist(uname)
 
+    # ===== 调试信息 =====
+    with st.expander("🔧 调试信息（问题解决后删）", expanded=False):
+        st.write("当前用户:", uname)
+        st.write("session_state logged_in:", st.session_state.get("logged_in"))
+        try:
+            from cloud_storage import PAT as _DBG_PAT, USER as _DBG_USER
+            st.write("云端PAT:", "✅ 已配置" if _DBG_PAT else "❌ 空（Secrets未配置）")
+            st.write("GitHub用户:", _DBG_USER)
+            from cloud_storage import load_watchlist_cloud
+            cloud_data = load_watchlist_cloud(uname)
+            st.write("云端读取结果:", cloud_data)
+        except Exception as _dbg_e:
+            st.write("云端模块错误:", str(_dbg_e))
+        st.write("watchlist条数:", len(wl))
+        if wl:
+            st.write("内容（前2条）:", wl[:2])
+
     dr = st.session_state.get("del_result", "")
     if dr:
         if dr.startswith("✅"):
